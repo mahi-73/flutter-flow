@@ -1,0 +1,5 @@
+let seconds = 25 * 60;
+let timer = null;
+
+const display = document.getElementById("time");
+const button = document.getElementById("startFocus");
