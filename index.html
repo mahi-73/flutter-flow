@@ -1,18 +1,1144 @@
 <!DOCTYPE html>
 <html lang="en">
-<head> 
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>FocusFlow</title>
-  <link rel="stylesheet" href="style.css">
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+
+    body {
+      background-color: #0c0d18;
+      color: white;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 24px 16px 50px;
+      margin: 0;
+    }
+
+    h1 {
+      color: #a78bfa;
+      font-size: 32px;
+      margin-bottom: 4px;
+    }
+
+    p {
+      color: #c4b5fd;
+      font-size: 14px;
+      margin-top: 0;
+      margin-bottom: 20px;
+    }
+
+    /* 2-Column Responsive Dashboard */
+    .dashboard-container {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 18px;
+      max-width: 760px;
+      margin: 0 auto;
+      flex-wrap: wrap;
+    }
+
+    .column {
+      flex: 1 1 340px;
+      max-width: 370px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .card {
+      background: #191a2e;
+      padding: 14px 16px;
+      margin: 0;
+      width: 100%;
+      border: 1px solid #a78bfa;
+      border-radius: 14px;
+    }
+
+    button {
+      background-color: #8b5cf6;
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      font-size: 12px;
+      cursor: pointer;
+      border-radius: 7px;
+      margin: 0 2px;
+      transition: background-color 0.2s ease;
+    }
+
+    button:hover {
+      background-color: #7c3aed;
+    }
+
+    .mode-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 5px;
+    }
+
+    .mode-buttons button {
+      background-color: transparent;
+      color: #c4b5fd;
+      border: 1px solid #4338ca;
+      padding: 4px 7px;
+      font-size: 11px;
+      border-radius: 5px;
+      white-space: nowrap;
+    }
+
+    .mode-buttons button:hover {
+      background-color: #312e81;
+    }
+
+    .mode-buttons button.active {
+      background-color: #8b5cf6;
+      border-color: #8b5cf6;
+      color: white;
+    }
+
+    .custom-time-row {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 5px;
+      margin-top: 8px;
+    }
+
+    .custom-time-row input {
+      width: 48px;
+      background-color: #0c0d18;
+      border: 1px solid #31375c;
+      border-radius: 5px;
+      padding: 3px 5px;
+      color: white;
+      font-size: 11px;
+      text-align: center;
+      outline: none;
+    }
+
+    .custom-time-row input:focus {
+      border-color: #a78bfa;
+    }
+
+    .custom-time-row button {
+      padding: 4px 8px;
+      font-size: 11px;
+    }
+
+    /* Scaled-Down Circular Timer Ring */
+    .timer-ring-container {
+      position: relative;
+      width: 140px;
+      height: 140px;
+      margin: 10px auto;
+    }
+
+    .timer-ring-svg {
+      transform: rotate(-90deg);
+      width: 140px;
+      height: 140px;
+    }
+
+    .timer-ring-bg {
+      fill: none;
+      stroke: #232742;
+      stroke-width: 6;
+    }
+
+    .timer-ring-progress {
+      fill: none;
+      stroke: #8b5cf6;
+      stroke-width: 6;
+      stroke-linecap: round;
+      stroke-dasharray: 408.4;
+      stroke-dashoffset: 0;
+      transition: stroke-dashoffset 1s linear;
+    }
+
+    #timerDisplay {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 28px;
+      font-weight: bold;
+      color: #a78bfa;
+      margin: 0;
+    }
+
+    .timer-controls {
+      margin-top: 2px;
+    }
+
+    .streak-container {
+      margin-top: 8px;
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .streak-badge {
+      display: inline-block;
+      background-color: #0c0d18;
+      border: 1px solid #312e81;
+      color: #c4b5fd;
+      padding: 3px 8px;
+      font-size: 11px;
+      border-radius: 16px;
+      font-weight: 500;
+    }
+
+    /* Daily Goal Tracker */
+    .goal-tracker {
+      margin-top: 10px;
+      padding-top: 8px;
+      border-top: 1px solid #232742;
+      font-size: 11px;
+      color: #c4b5fd;
+    }
+
+    .goal-dots {
+      display: flex;
+      justify-content: center;
+      gap: 5px;
+      margin-top: 5px;
+    }
+
+    .goal-dot {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      background: #0c0d18;
+      border: 1px solid #4338ca;
+      transition: background 0.3s;
+    }
+
+    .goal-dot.completed {
+      background: #8b5cf6;
+      box-shadow: 0 0 5px #8b5cf6;
+    }
+
+    /* Ambient Sounds */
+    .ambient-card {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .ambient-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+    }
+
+    .ambient-row span {
+      font-size: 12px;
+      color: #c4b5fd;
+    }
+
+    .ambient-controls {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .ambient-controls button {
+      padding: 3px 8px;
+      font-size: 10px;
+    }
+
+    .ambient-controls input[type="range"] {
+      width: 65px;
+      accent-color: #8b5cf6;
+      cursor: pointer;
+    }
+
+    /* Tasks Board & Journal */
+    .tasks-container, .journal-container {
+      text-align: left;
+    }
+
+    .tasks-container h2, .journal-container h2 {
+      text-align: center;
+      color: #a78bfa;
+      font-size: 17px;
+      margin: 0 0 8px 0;
+    }
+
+    .progress-section {
+      margin-bottom: 10px;
+    }
+
+    .progress-label {
+      font-size: 11px;
+      color: #c4b5fd;
+      display: block;
+      margin-bottom: 3px;
+      text-align: center;
+    }
+
+    .progress-bar-bg {
+      width: 100%;
+      height: 6px;
+      background-color: #0c0d18;
+      border-radius: 4px;
+      overflow: hidden;
+      border: 1px solid #232742;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      width: 0%;
+      background-color: #8b5cf6;
+      border-radius: 4px;
+      transition: width 0.3s ease;
+    }
+
+    .task-input-row {
+      display: flex;
+      gap: 5px;
+      margin-bottom: 10px;
+      align-items: center;
+      width: 100%;
+    }
+
+    .task-input-row input {
+      flex: 1 1 auto;
+      min-width: 0;
+      background-color: #0c0d18;
+      border: 1px solid #31375c;
+      border-radius: 7px;
+      padding: 7px 9px;
+      color: white;
+      font-size: 12px;
+      outline: none;
+    }
+
+    .task-input-row input:focus {
+      border-color: #a78bfa;
+    }
+
+    .task-input-row select {
+      flex: 0 0 auto;
+      background-color: #0c0d18;
+      border: 1px solid #31375c;
+      border-radius: 7px;
+      color: #c4b5fd;
+      padding: 6px 4px;
+      font-size: 11px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .task-input-row button {
+      flex: 0 0 auto;
+      padding: 7px 11px;
+      font-size: 12px;
+      margin: 0;
+    }
+
+    #task-list, #journal-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    #task-list li, #journal-list li {
+      background-color: #0c0d18;
+      border: 1px solid #232742;
+      padding: 8px 10px;
+      border-radius: 7px;
+      font-size: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: border-color 0.2s;
+    }
+
+    #task-list li:hover, #journal-list li:hover {
+      border-color: #a78bfa;
+    }
+
+    .empty-state {
+      color: #64748b;
+      border: 1px dashed #232742 !important;
+      justify-content: center !important;
+      cursor: default;
+    }
+
+    #task-list li.done span.task-text {
+      text-decoration: line-through;
+      color: #64748b;
+    }
+
+    .task-content {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      flex: 1;
+      cursor: pointer;
+      overflow: hidden;
+    }
+
+    .task-text {
+      word-break: break-word;
+      padding-right: 6px;
+    }
+
+    .priority-tag {
+      font-size: 9px;
+      padding: 2px 4px;
+      border-radius: 3px;
+      font-weight: bold;
+      text-transform: uppercase;
+      flex-shrink: 0;
+    }
+
+    .priority-high { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid #ef4444; }
+    .priority-med { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid #f59e0b; }
+    .priority-low { background: rgba(34, 197, 94, 0.2); color: #4ade80; border: 1px solid #22c55e; }
+
+    .delete-btn {
+      background: transparent;
+      border: none;
+      color: #ef4444;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+      padding: 2px 5px;
+      border-radius: 3px;
+      line-height: 1;
+      margin: 0;
+    }
+
+    .delete-btn:hover {
+      background-color: rgba(239, 68, 68, 0.2);
+    }
+
+    .task-actions {
+      margin-top: 8px;
+      text-align: right;
+    }
+
+    .clear-btn {
+      background: transparent;
+      color: #94a3b8;
+      border: none;
+      font-size: 11px;
+      padding: 3px 5px;
+      margin: 0;
+      cursor: pointer;
+    }
+
+    .clear-btn:hover {
+      background: transparent;
+      color: #ef4444;
+      text-decoration: underline;
+    }
+
+    .journal-entry-time {
+      font-size: 10px;
+      color: #8b5cf6;
+      font-weight: bold;
+      margin-right: 5px;
+    }
+
+    .export-container {
+      width: 100%;
+    }
+
+    #export-report-btn {
+      width: 100%;
+      padding: 10px;
+      font-weight: bold;
+      background-color: #6d28d9;
+      font-size: 12px;
+    }
+
+    #export-report-btn:hover {
+      background-color: #5b21b6;
+    }
+
+    #confetti-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 9999;
+    }
+  </style>
 </head>
 <body>
-<h1>Welcome to FocusFlow!</h1>
+  <canvas id="confetti-canvas"></canvas>
+
+  <h1>Welcome to FocusFlow!</h1>
   <p>My personal study planner.</p>
 
+  <div class="dashboard-container">
+    
+    <!-- LEFT SIDE: Compact Timer & Export Button -->
+    <div class="column">
+      <div class="card">
+        <div class="mode-buttons">
+          <button class="mode-btn active" id="focus-mode">Focus (25m)</button>
+          <button class="mode-btn" id="short-break">Short (5m)</button>
+          <button class="mode-btn" id="long-break">Long (15m)</button>
+        </div>
 
-  <div class="timer">
-<h2>focusTimer</h2>
-<div id ="timerDisplay">25:00</div>
-<button>Start Focus</button>
+        <div class="custom-time-row">
+          <input type="number" id="custom-min" min="1" max="180" placeholder="Min">
+          <button id="set-custom-btn">Set Custom</button>
+        </div>
+        
+        <div class="timer-ring-container">
+          <svg class="timer-ring-svg" viewBox="0 0 140 140">
+            <circle class="timer-ring-bg" cx="70" cy="70" r="65"></circle>
+            <circle class="timer-ring-progress" id="timer-progress" cx="70" cy="70" r="65"></circle>
+          </svg>
+          <div id="timerDisplay">25:00</div>
+        </div>
+
+        <div class="timer-controls">
+          <button id="start-btn">Start</button>
+          <button id="pause-btn">Pause</button>
+          <button id="reset-btn">Reset</button>
+        </div>
+
+        <div class="streak-container">
+          <div class="streak-badge" id="streak-display">🍅 Total: 0</div>
+          <div class="streak-badge" id="total-time-display">⏱️ Total Focus: 0m</div>
+        </div>
+
+        <div class="goal-tracker">
+          <span id="goal-label">Daily Goal: 0/4 Completed</span>
+          <div class="goal-dots" id="goal-dots"></div>
+        </div>
+      </div>
+
+      <div class="export-container">
+        <button id="export-report-btn">📄 Export Study Summary (.txt)</button>
+      </div>
+    </div>
+
+    <!-- RIGHT SIDE: Study Tasks, Session Log & Ambient Noise -->
+    <div class="column">
+      <!-- Tasks Card -->
+      <div class="card tasks-container">
+        <h2>Study Tasks</h2>
+
+        <div class="progress-section">
+          <span class="progress-label" id="progress-label">0 of 0 tasks completed</span>
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill" id="progress-bar-fill"></div>
+          </div>
+        </div>
+
+        <div class="task-input-row">
+          <input type="text" id="task-input" placeholder="Enter topic...">
+          <select id="priority-select">
+            <option value="high">🔴 High</option>
+            <option value="med" selected>🟡 Med</option>
+            <option value="low">🟢 Low</option>
+          </select>
+          <button id="add-task-btn">Add</button>
+        </div>
+
+        <ul id="task-list"></ul>
+
+        <div class="task-actions" id="task-actions-row" style="display: none;">
+          <button class="clear-btn" id="clear-completed-btn">Clear completed</button>
+        </div>
+      </div>
+
+      <!-- Session Reflection & Mini Journal Card -->
+      <div class="card journal-container">
+        <h2>Session Log</h2>
+        <ul id="journal-list"></ul>
+        <div class="task-actions" id="journal-actions-row" style="display: none;">
+          <button class="clear-btn" id="clear-journal-btn">Clear log</button>
+        </div>
+      </div>
+
+      <!-- Ambient Sound Card -->
+      <div class="card ambient-card">
+        <div class="ambient-row">
+          <span>🌧️ Rain Noise</span>
+          <div class="ambient-controls">
+            <button id="rain-btn">Play</button>
+            <input type="range" id="rain-volume" min="0" max="1" step="0.05" value="0.3">
+          </div>
+        </div>
+        <div class="ambient-row">
+          <span>🧠 40Hz Binaural Hum</span>
+          <div class="ambient-controls">
+            <button id="binaural-btn">Play</button>
+            <input type="range" id="binaural-volume" min="0" max="1" step="0.05" value="0.2">
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
+
+  <script>
+    if ("Notification" in window && Notification.permission !== "granted") {
+      Notification.requestPermission();
+    }
+
+    // ---------------- Timer State & Ring ----------------
+    let currentModeDuration = 25 * 60;
+    let timeLeft = currentModeDuration;
+    let timerId = null;
+
+    let sessionsCount = parseInt(localStorage.getItem('focusflow_sessions')) || 0;
+    let totalFocusSeconds = parseInt(localStorage.getItem('focusflow_total_focus_seconds')) || 0;
+    const dailyGoalTarget = 4;
+
+    const timerDisplay = document.getElementById('timerDisplay');
+    const timerProgress = document.getElementById('timer-progress');
+    const ringCircumference = 2 * Math.PI * 65;
+    timerProgress.style.strokeDasharray = ringCircumference;
+
+    const startBtn = document.getElementById('start-btn');
+    const pauseBtn = document.getElementById('pause-btn');
+    const resetBtn = document.getElementById('reset-btn');
+    const streakDisplay = document.getElementById('streak-display');
+    const totalTimeDisplay = document.getElementById('total-time-display');
+    const goalLabel = document.getElementById('goal-label');
+    const goalDotsContainer = document.getElementById('goal-dots');
+
+    const focusBtn = document.getElementById('focus-mode');
+    const shortBreakBtn = document.getElementById('short-break');
+    const longBreakBtn = document.getElementById('long-break');
+    const customMinInput = document.getElementById('custom-min');
+    const setCustomBtn = document.getElementById('set-custom-btn');
+    const modeButtons = [focusBtn, shortBreakBtn, longBreakBtn];
+
+    function updateTotalTimeDisplay() {
+      const hours = Math.floor(totalFocusSeconds / 3600);
+      const minutes = Math.floor((totalFocusSeconds % 3600) / 60);
+      if (hours > 0) {
+        totalTimeDisplay.textContent = `⏱️ Total Focus: ${hours}h ${minutes}m`;
+      } else {
+        totalTimeDisplay.textContent = `⏱️ Total Focus: ${minutes}m`;
+      }
+    }
+
+    function updateDisplay() {
+      const minutes = Math.floor(timeLeft / 60);
+      const seconds = timeLeft % 60;
+      const formatted = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+      timerDisplay.textContent = formatted;
+      document.title = `(${formatted}) FocusFlow`;
+
+      const progressFraction = timeLeft / currentModeDuration;
+      const offset = ringCircumference * (1 - progressFraction);
+      timerProgress.style.strokeDashoffset = offset;
+    }
+
+    function updateStreakDisplay() {
+      streakDisplay.textContent = `🍅 Total: ${sessionsCount}`;
+      const completedToday = sessionsCount % dailyGoalTarget;
+      goalLabel.textContent = `Daily Goal: ${completedToday}/${dailyGoalTarget} Completed`;
+
+      goalDotsContainer.innerHTML = '';
+      for (let i = 0; i < dailyGoalTarget; i++) {
+        const dot = document.createElement('div');
+        dot.className = 'goal-dot' + (i < completedToday ? ' completed' : '');
+        goalDotsContainer.appendChild(dot);
+      }
+    }
+
+    function setMode(duration, activeBtn) {
+      clearInterval(timerId);
+      timerId = null;
+      currentModeDuration = duration;
+      timeLeft = duration;
+      updateDisplay();
+
+      modeButtons.forEach(btn => btn?.classList.remove('active'));
+      if (activeBtn) activeBtn.classList.add('active');
+    }
+
+    focusBtn.addEventListener('click', () => setMode(25 * 60, focusBtn));
+    shortBreakBtn.addEventListener('click', () => setMode(5 * 60, shortBreakBtn));
+    longBreakBtn.addEventListener('click', () => setMode(15 * 60, longBreakBtn));
+
+    setCustomBtn.addEventListener('click', () => {
+      const customMin = parseInt(customMinInput.value);
+      if (customMin && customMin > 0) {
+        setMode(customMin * 60, null);
+        customMinInput.value = '';
+      }
+    });
+
+    function playChime() {
+      try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(587.33, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.3);
+
+        gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1.2);
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        osc.start();
+        osc.stop(audioCtx.currentTime + 1.2);
+      } catch (e) {
+        console.error('Audio chime error:', e);
+      }
+    }
+
+    startBtn.addEventListener('click', () => {
+      if (timerId === null) {
+        timerId = setInterval(() => {
+          if (timeLeft > 0) {
+            timeLeft--;
+            updateDisplay();
+
+            if (currentModeDuration >= 20 * 60) {
+              totalFocusSeconds++;
+              if (totalFocusSeconds % 10 === 0) {
+                localStorage.setItem('focusflow_total_focus_seconds', totalFocusSeconds);
+              }
+              updateTotalTimeDisplay();
+            }
+          } else {
+            clearInterval(timerId);
+            timerId = null;
+            playChime();
+
+            let hitDailyGoal = false;
+            if (currentModeDuration >= 20 * 60) {
+              sessionsCount++;
+              localStorage.setItem('focusflow_sessions', sessionsCount);
+              updateStreakDisplay();
+              if (sessionsCount % dailyGoalTarget === 0) {
+                hitDailyGoal = true;
+                launchConfetti();
+              }
+            }
+
+            if ("Notification" in window && Notification.permission === "granted") {
+              new Notification("FocusFlow", {
+                body: hitDailyGoal ? "Daily Goal achieved! Fantastic job!" : "Time is up! Great session.",
+                icon: "🍅"
+              });
+            }
+
+            setTimeout(() => {
+              const note = prompt("Session Complete! What did you accomplish? (Leave blank to skip)");
+              if (note && note.trim() !== '') {
+                addJournalEntry(note.trim());
+              }
+            }, 300);
+          }
+        }, 1000);
+      }
+    });
+
+    pauseBtn.addEventListener('click', () => {
+      clearInterval(timerId);
+      timerId = null;
+    });
+
+    resetBtn.addEventListener('click', () => {
+      clearInterval(timerId);
+      timerId = null;
+      timeLeft = currentModeDuration;
+      updateDisplay();
+    });
+
+    // ---------------- Ambient Sounds (Rain & Binaural) ----------------
+    let rainCtx = null, rainGain = null, rainSource = null, isRainPlaying = false;
+    let binCtx = null, binGain = null, oscL = null, oscR = null, isBinPlaying = false;
+
+    const rainBtn = document.getElementById('rain-btn');
+    const rainVolume = document.getElementById('rain-volume');
+    const binBtn = document.getElementById('binaural-btn');
+    const binVolume = document.getElementById('binaural-volume');
+
+    function toggleRain() {
+      if (!isRainPlaying) {
+        rainCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const bufferSize = rainCtx.sampleRate * 2;
+        const buffer = rainCtx.createBuffer(1, bufferSize, rainCtx.sampleRate);
+        const data = buffer.getChannelData(0);
+
+        let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
+        for (let i = 0; i < bufferSize; i++) {
+          const white = Math.random() * 2 - 1;
+          b0 = 0.99886 * b0 + white * 0.0555179;
+          b1 = 0.99332 * b1 + white * 0.0750759;
+          b2 = 0.96900 * b2 + white * 0.1538520;
+          b3 = 0.86650 * b3 + white * 0.3104856;
+          b4 = 0.55000 * b4 + white * 0.5329522;
+          b5 = -0.7616 * b5 - white * 0.0168980;
+          data[i] = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362) * 0.05;
+          b6 = white * 0.115926;
+        }
+
+        rainSource = rainCtx.createBufferSource();
+        rainSource.buffer = buffer;
+        rainSource.loop = true;
+
+        rainGain = rainCtx.createGain();
+        rainGain.gain.setValueAtTime(parseFloat(rainVolume.value), rainCtx.currentTime);
+
+        rainSource.connect(rainGain);
+        rainGain.connect(rainCtx.destination);
+        rainSource.start();
+
+        rainBtn.textContent = 'Pause';
+        isRainPlaying = true;
+      } else {
+        if (rainSource) { rainSource.stop(); rainSource.disconnect(); }
+        if (rainCtx) { rainCtx.close(); }
+        rainBtn.textContent = 'Play';
+        isRainPlaying = false;
+      }
+    }
+
+    function toggleBinaural() {
+      if (!isBinPlaying) {
+        binCtx = new (window.AudioContext || window.webkitAudioContext)();
+        binGain = binCtx.createGain();
+        binGain.gain.setValueAtTime(parseFloat(binVolume.value), binCtx.currentTime);
+
+        const merger = binCtx.createChannelMerger(2);
+
+        oscL = binCtx.createOscillator();
+        oscL.type = 'sine';
+        oscL.frequency.setValueAtTime(200, binCtx.currentTime);
+
+        oscR = binCtx.createOscillator();
+        oscR.type = 'sine';
+        oscR.frequency.setValueAtTime(240, binCtx.currentTime);
+
+        oscL.connect(merger, 0, 0);
+        oscR.connect(merger, 0, 1);
+        merger.connect(binGain);
+        binGain.connect(binCtx.destination);
+
+        oscL.start();
+        oscR.start();
+
+        binBtn.textContent = 'Pause';
+        isBinPlaying = true;
+      } else {
+        if (oscL) oscL.stop();
+        if (oscR) oscR.stop();
+        if (binCtx) binCtx.close();
+        binBtn.textContent = 'Play';
+        isBinPlaying = false;
+      }
+    }
+
+    rainBtn.addEventListener('click', toggleRain);
+    binBtn.addEventListener('click', toggleBinaural);
+
+    rainVolume.addEventListener('input', (e) => {
+      if (rainGain && rainCtx) rainGain.gain.setValueAtTime(parseFloat(e.target.value), rainCtx.currentTime);
+    });
+    binVolume.addEventListener('input', (e) => {
+      if (binGain && binCtx) binGain.gain.setValueAtTime(parseFloat(e.target.value), binCtx.currentTime);
+    });
+
+    // ---------------- Task Management & Priority ----------------
+    const taskInput = document.getElementById('task-input');
+    const prioritySelect = document.getElementById('priority-select');
+    const addTaskBtn = document.getElementById('add-task-btn');
+    const taskList = document.getElementById('task-list');
+    const clearCompletedBtn = document.getElementById('clear-completed-btn');
+    const taskActionsRow = document.getElementById('task-actions-row');
+    const progressLabel = document.getElementById('progress-label');
+    const progressBarFill = document.getElementById('progress-bar-fill');
+
+    let tasks = [];
+    try {
+      tasks = JSON.parse(localStorage.getItem('focusflow_tasks')) || [];
+    } catch (e) {
+      tasks = [];
+    }
+
+    function saveTasks() {
+      localStorage.setItem('focusflow_tasks', JSON.stringify(tasks));
+      updateProgress();
+    }
+
+    function updateProgress() {
+      const total = tasks.length;
+      const completed = tasks.filter(t => t.done).length;
+      progressLabel.textContent = `${completed} of ${total} tasks completed`;
+      const percentage = total === 0 ? 0 : Math.round((completed / total) * 100);
+      progressBarFill.style.width = `${percentage}%`;
+    }
+
+    function renderTasks() {
+      taskList.innerHTML = '';
+
+      if (tasks.length === 0) {
+        const emptyLi = document.createElement('li');
+        emptyLi.className = 'empty-state';
+        emptyLi.textContent = 'No tasks yet. Add one above!';
+        taskList.appendChild(emptyLi);
+        taskActionsRow.style.display = 'none';
+        updateProgress();
+        return;
+      }
+
+      const hasCompleted = tasks.some(t => t.done);
+      taskActionsRow.style.display = hasCompleted ? 'block' : 'none';
+
+      tasks.forEach((task, index) => {
+        const li = document.createElement('li');
+        if (task.done) li.classList.add('done');
+
+        const contentDiv = document.createElement('div');
+        contentDiv.className = 'task-content';
+
+        const badge = document.createElement('span');
+        badge.className = `priority-tag priority-${task.priority || 'med'}`;
+        badge.textContent = task.priority || 'med';
+
+        const span = document.createElement('span');
+        span.className = 'task-text';
+        span.textContent = task.text;
+
+        contentDiv.appendChild(badge);
+        contentDiv.appendChild(span);
+
+        contentDiv.addEventListener('click', () => {
+          task.done = !task.done;
+          saveTasks();
+          renderTasks();
+        });
+
+        const delBtn = document.createElement('button');
+        delBtn.textContent = '✕';
+        delBtn.className = 'delete-btn';
+        delBtn.type = 'button';
+        delBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          tasks.splice(index, 1);
+          saveTasks();
+          renderTasks();
+        });
+
+        li.appendChild(contentDiv);
+        li.appendChild(delBtn);
+        taskList.appendChild(li);
+      });
+
+      updateProgress();
+    }
+
+    function addTask() {
+      const taskText = taskInput.value.trim();
+      if (taskText === '') return;
+
+      tasks.push({
+        text: taskText,
+        priority: prioritySelect.value,
+        done: false
+      });
+      saveTasks();
+      renderTasks();
+      taskInput.value = '';
+    }
+
+    clearCompletedBtn.addEventListener('click', () => {
+      tasks = tasks.filter(t => !t.done);
+      saveTasks();
+      renderTasks();
+    });
+
+    addTaskBtn.addEventListener('click', addTask);
+    taskInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') addTask();
+    });
+
+    // ---------------- Study Journal Log ----------------
+    const journalList = document.getElementById('journal-list');
+    const journalActionsRow = document.getElementById('journal-actions-row');
+    const clearJournalBtn = document.getElementById('clear-journal-btn');
+
+    let journalEntries = [];
+    try {
+      journalEntries = JSON.parse(localStorage.getItem('focusflow_journal')) || [];
+    } catch (e) {
+      journalEntries = [];
+    }
+
+    function renderJournal() {
+      journalList.innerHTML = '';
+      if (journalEntries.length === 0) {
+        const emptyLi = document.createElement('li');
+        emptyLi.className = 'empty-state';
+        emptyLi.textContent = 'Completed sessions will log here.';
+        journalList.appendChild(emptyLi);
+        journalActionsRow.style.display = 'none';
+        return;
+      }
+
+      journalActionsRow.style.display = 'block';
+      journalEntries.forEach((entry) => {
+        const li = document.createElement('li');
+        li.innerHTML = `<span class="journal-entry-time">${entry.time}</span> <span class="task-text">${entry.note}</span>`;
+        journalList.appendChild(li);
+      });
+    }
+
+    function addJournalEntry(note) {
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      journalEntries.unshift({ time: timeStr, note });
+      localStorage.setItem('focusflow_journal', JSON.stringify(journalEntries));
+      renderJournal();
+    }
+
+    clearJournalBtn.addEventListener('click', () => {
+      journalEntries = [];
+      localStorage.removeItem('focusflow_journal');
+      renderJournal();
+    });
+
+    // ---------------- Export Study Report (.txt) ----------------
+    const exportBtn = document.getElementById('export-report-btn');
+
+    exportBtn.addEventListener('click', () => {
+      const today = new Date().toLocaleDateString();
+      const hours = Math.floor(totalFocusSeconds / 3600);
+      const minutes = Math.floor((totalFocusSeconds % 3600) / 60);
+
+      const completedTasks = tasks.filter(t => t.done).map(t => `- [x] [${t.priority.toUpperCase()}] ${t.text}`);
+      const pendingTasks = tasks.filter(t => !t.done).map(t => `- [ ] [${t.priority.toUpperCase()}] ${t.text}`);
+
+      const journalLines = journalEntries.map(j => `[${j.time}] ${j.note}`);
+
+      let content = `==============================\n`;
+      content += ` FOCUSFLOW STUDY REPORT\n`;
+      content += ` Date: ${today}\n`;
+      content += `==============================\n\n`;
+
+      content += `⏱️ STATS:\n`;
+      content += `- Total Focused Time: ${hours}h ${minutes}m\n`;
+      content += `- Completed Pomodoro Sessions: ${sessionsCount} 🍅\n\n`;
+
+      content += `✅ COMPLETED TASKS (${completedTasks.length}):\n`;
+      content += (completedTasks.length > 0 ? completedTasks.join('\n') : '- None') + '\n\n';
+
+      content += `⏳ PENDING TASKS (${pendingTasks.length}):\n`;
+      content += (pendingTasks.length > 0 ? pendingTasks.join('\n') : '- None') + '\n\n';
+
+      content += `📝 SESSION JOURNAL:\n`;
+      content += (journalLines.length > 0 ? journalLines.join('\n') : '- No reflection notes recorded.') + '\n\n';
+
+      const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `focusflow-report-${new Date().toISOString().slice(0, 10)}.txt`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    });
+
+    // ---------------- Confetti Burst Animation ----------------
+    function launchConfetti() {
+      const canvas = document.getElementById('confetti-canvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      const particles = [];
+      const colors = ['#8b5cf6', '#a78bfa', '#c4b5fd', '#38bdf8', '#f43f5e', '#fbbf24'];
+
+      for (let i = 0; i < 90; i++) {
+        particles.push({
+          x: canvas.width / 2,
+          y: canvas.height / 2,
+          r: Math.random() * 6 + 4,
+          dx: (Math.random() - 0.5) * 14,
+          dy: (Math.random() - 0.7) * 16,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          gravity: 0.35,
+          alpha: 1
+        });
+      }
+
+      function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        let active = false;
+
+        particles.forEach(p => {
+          p.x += p.dx;
+          p.y += p.dy;
+          p.dy += p.gravity;
+          p.alpha -= 0.012;
+
+          if (p.alpha > 0) {
+            active = true;
+            ctx.save();
+            ctx.globalAlpha = p.alpha;
+            ctx.fillStyle = p.color;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+          }
+        });
+
+        if (active) {
+          requestAnimationFrame(animate);
+        } else {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+      }
+      animate();
+    }
+
+    // ---------------- Keyboard Shortcuts ----------------
+    window.addEventListener('keydown', (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+
+      if (e.code === 'Space') {
+        e.preventDefault();
+        if (timerId === null) {
+          startBtn.click();
+        } else {
+          pauseBtn.click();
+        }
+      } else if (e.key === 'r' || e.key === 'R') {
+        resetBtn.click();
+      }
+    });
+
+    // Initial setup calls
+    updateDisplay();
+    updateStreakDisplay();
+    updateTotalTimeDisplay();
+    renderTasks();
+    renderJournal();
+  </script>
 </body>
 </html>
